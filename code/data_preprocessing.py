@@ -45,6 +45,7 @@ def build_gtzan(path, f):
     # Features to build in the final dictionary
     features = {'classlabel': [], 'mfcc_mean_matrix': [], 'variance': []}
 
+    print("\n")
     folderIndex = 0    
     """Load GTZAN data from `path`"""
     for folder in os.listdir(path):
@@ -72,17 +73,14 @@ def build_gtzan(path, f):
     pickle.dump(df, f)
 
 # Used for compression features to a binary file.            
-def build_binaryfile():
-    if(path.exists(fileName) == False):
-        f = open(fileName, 'wb')
-        build_gtzan(local_directory, f)
-        f.close()
+def build_binaryfile(pathName):
+    f = open(fileName, 'wb')
+    build_gtzan(pathName, f)
+    f.close()
 
 # Used for loading a .dat binary file and loading it into a pandas DataFrame.
 def load_binaryfile(file):
-
-    data = None
-    
+    data = None 
     with open(fileName, 'rb') as f:
         while True:
             try:
