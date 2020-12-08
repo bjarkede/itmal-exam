@@ -13,7 +13,7 @@ from scipy.stats import kurtosis
 from scipy.stats import skew
 
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 
 local_directory = "C:\\Users\\jonas\\Desktop\\itmal-exame\\itmal-exam\\code\\"
 fileName = "features.dat"
@@ -193,12 +193,17 @@ def encode_class_labels(df):
 # Partion the dataset into seperate train/test sets.
 # Furthermore we use standardization for optimization for algorithms such as gradiant descent.
 def partion_dataset(df):
-    stdsc = StandardScaler()
-    
-    X, y = df.iloc[:, 0:-1].values, df.iloc[:,-1:].values
-    X_train, X_test, y_train, y_test =\
-        train_test_split(X, y, test_size=0.3, random_state=0, stratify=y)
-    return (stdsc.fit_transform(X_train), stdsc.transform(X_test), y_train, y_test)
+    y = df.classlabel
+    X = df.drop('classlabel',axis=1)
+
+    cols = X.columns
+    min_max_scaler = MinMaxScaler()
+    np_scaled = min_max_scaler.fit_transform(X)
+
+    X = pd.DataFrame(np_scaled, columns = cols)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+    return X_train, X_test, y_train, y_test
 
 def get_features(pathtofile):
     y, sr = librosa.load(pathtofile,duration=30)
