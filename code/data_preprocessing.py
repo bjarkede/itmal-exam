@@ -23,21 +23,23 @@ def get_statistics(desc):
     result = {}
     
     for k, values in desc.items():
-        if k != 'classlabel':
+        if k != 'classlabel' and k != 'tempo':
             # Ugly hack to create the dictionary
             result['{}_max'.format(k)] = []
             result['{}_min'.format(k)] = []
             result['{}_mean'.format(k)] = []
-            #result['{}_std'.format(k)] = []
-            #result['{}_kurtosis'.format(k)] = []
-            #result['{}_skew'.format(k)] = []
+            result['{}_std'.format(k)] = []
+            result['{}_kurtosis'.format(k)] = []
+            result['{}_skew'.format(k)] = []
+            result['{}_var'.format(k)] = []
             for v in values:
                 result['{}_max'.format(k)].append(np.max(v))
                 result['{}_min'.format(k)].append(np.min(v))
                 result['{}_mean'.format(k)].append(np.mean(v))
-                #result['{}_std'.format(k)].append(np.std(v))
-                #result['{}_kurtosis'.format(k)].append(kurtosis(v))
-                #result['{}_skew'.format(k)].append(skew(v))
+                result['{}_std'.format(k)].append(np.std(v))
+                result['{}_kurtosis'.format(k)].append(kurtosis(v))
+                result['{}_skew'.format(k)].append(skew(v))
+                result['{}_var'.format(k)].append(np.var(v))
     return result
 
 # For feature extraction we use Mel Frequency Cepstral Coefficients (MFCC)
@@ -83,7 +85,7 @@ def build_gtzan(path, f):
                 zeroX = librosa.feature.zero_crossing_rate(y_trimmed,pad=False)
                 zeroX_mean = zeroX.mean()
                 zeroX_var = zeroX.var()
-                
+               
                 
                 #harmony & perceptrual
                 harm, perc = librosa.effects.hpss(y_trimmed)
@@ -122,7 +124,7 @@ def build_gtzan(path, f):
             
 
             
-            # MFCC treatment
+                # MFCC treatment
                 for i in range(20):
                     mfcc  = librosa.feature.mfcc(y, sr, n_mfcc=i+1)
                     mfcc_mean = mfcc.mean()
@@ -147,14 +149,13 @@ def build_gtzan(path, f):
                 features['centroid_mean'].append(centroid_mean)
                 features['centroid_var'].append(centroid_var)
                 features['rolloff_mean'].append(rolloff_mean)
-                features['rolloff_var'].append(rolloff_mean)
+                features['rolloff_var'].append(rolloff_var)
                 features['chroma_stft_mean'].append(chroma_mean)
                 features['chroma_stft_var'].append(chroma_var)
                 features['rms_mean'].append(rms_mean)
                 features['rms_var'].append(rms_var)
                 features['bandwidth_mean'].append(bandwidth_mean)
                 features['bandwidth_var'].append(bandwidth_var)
-
 
 
     #dict_features = get_statistics(features)
@@ -206,7 +207,20 @@ def partion_dataset(df):
     return X_train, X_test, y_train, y_test
 
 def get_features(pathtofile):
-    y, sr = librosa.load(pathtofile,duration=30)
+    features = {'classlabel': [], 'chroma_stft_mean':[],'chroma_stft_var':[],'rms_mean':[],
+           'rms_var':[],'bandwidth_mean':[],'bandwidth_var':[],'centroid_mean':[],
+           'centroid_var':[],'zero_crossing_mean':[],'zero_crossing_var':[],
+           'harmony_mean':[],'harmony_var':[],'rolloff_mean':[],'rolloff_var':[],
+           'perceptrual_mean':[],'perceptrual_var':[],'tempo':[]}
+    
+    for i in range(20):
+        feat1 = f"mfcc{i+1}_mean"
+        feat2 = f"mfcc{i+1}_var"
+        features[feat1] = []
+        features[feat2] = []
+    
+    
+    y, sr = librosa.load(pathtofile)
 
     #Removing silence
     y_trimmed,_ = librosa.effects.trim(y)
@@ -215,8 +229,7 @@ def get_features(pathtofile):
     zeroX = librosa.feature.zero_crossing_rate(y_trimmed,pad=False)
     zeroX_mean = zeroX.mean()
     zeroX_var = zeroX.var()
-                
-                
+                         
     #harmony & perceptrual
     harm, perc = librosa.effects.hpss(y_trimmed)
     harm_mean = harm.mean()
@@ -279,7 +292,7 @@ def get_features(pathtofile):
     features['centroid_mean'].append(centroid_mean)
     features['centroid_var'].append(centroid_var)
     features['rolloff_mean'].append(rolloff_mean)
-    features['rolloff_var'].append(rolloff_mean)
+    features['rolloff_var'].append(rolloff_var)
     features['chroma_stft_mean'].append(chroma_mean)
     features['chroma_stft_var'].append(chroma_var)
     features['rms_mean'].append(rms_mean)
