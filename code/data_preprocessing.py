@@ -18,30 +18,6 @@ from sklearn.preprocessing import MinMaxScaler
 local_directory = "C:\\Users\\jonas\\Desktop\\itmal-exame\\itmal-exam\\code\\"
 fileName = "features.dat"
 
-# Gets various statistics for each feature in the desc
-def get_statistics(desc):
-    result = {}
-    
-    for k, values in desc.items():
-        if k != 'classlabel' and k != 'tempo':
-            # Ugly hack to create the dictionary
-            result['{}_max'.format(k)] = []
-            result['{}_min'.format(k)] = []
-            result['{}_mean'.format(k)] = []
-            result['{}_std'.format(k)] = []
-            result['{}_kurtosis'.format(k)] = []
-            result['{}_skew'.format(k)] = []
-            result['{}_var'.format(k)] = []
-            for v in values:
-                result['{}_max'.format(k)].append(np.max(v))
-                result['{}_min'.format(k)].append(np.min(v))
-                result['{}_mean'.format(k)].append(np.mean(v))
-                result['{}_std'.format(k)].append(np.std(v))
-                result['{}_kurtosis'.format(k)].append(kurtosis(v))
-                result['{}_skew'.format(k)].append(skew(v))
-                result['{}_var'.format(k)].append(np.var(v))
-    return result
-
 # For feature extraction we use Mel Frequency Cepstral Coefficients (MFCC)
 # This makes the data more concise, and reduces features per frame.
 def build_gtzan(path, f):
@@ -157,10 +133,6 @@ def build_gtzan(path, f):
                 features['bandwidth_mean'].append(bandwidth_mean)
                 features['bandwidth_var'].append(bandwidth_var)
 
-
-    #dict_features = get_statistics(features)
-    #dict_features['classlabel'] = features['classlabel']
-    #df = pd.DataFrame(dict_features)
     df = pd.DataFrame(features)
     pickle.dump(df, f)
     t = (time() - start) / 60
